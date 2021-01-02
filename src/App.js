@@ -54,6 +54,26 @@ const App = () => {
       })
   }
 
+  const likeBlog = async (id, blog) => {
+    try {
+
+      await blogService
+        .update(id, { "likes": ++blog.likes })
+      setMessageType('success')
+      setNotificationMessage('you just liked: '.concat(blog.title))
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 5000)
+    } catch (exception) {
+      --blog.likes
+      setMessageType('error')
+      setNotificationMessage('Unable to like blog post')
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 5000)
+    }
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
     console.log('logging in with', username, password)
@@ -127,7 +147,7 @@ const App = () => {
           </Togglable>
 
           {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} />
+            <Blog key={blog.id} blog={blog} likeBlog={likeBlog} />
           )}
         </div>
       }
