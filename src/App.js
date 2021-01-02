@@ -54,6 +54,32 @@ const App = () => {
       })
   }
 
+  const deleteBlog = async (id, blog) => {
+    let permission = window.confirm(`remove blog`, blog.title, ` by `, blog.author)
+
+    if (permission) {
+
+      try {
+        await blogService
+          .remove(id)
+        setMessageType('success')
+        setNotificationMessage('blog deleted succesfully: ')
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+
+      } catch (e) {
+        setMessageType('error')
+        setNotificationMessage('Unable to delete blog post')
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+      }
+
+    }
+
+  }
+
   const likeBlog = async (id, blog) => {
     try {
 
@@ -64,7 +90,7 @@ const App = () => {
       setTimeout(() => {
         setNotificationMessage(null)
       }, 5000)
-    } catch (exception) {
+    } catch (e) {
       --blog.likes
       setMessageType('error')
       setNotificationMessage('Unable to like blog post')
@@ -149,7 +175,7 @@ const App = () => {
           {blogs
             .sort((a, b) => (a.likes > b.likes ? 1 : -1))
             .map(blog =>
-              <Blog key={blog.id} blog={blog} likeBlog={likeBlog} />
+              <Blog key={blog.id} blog={blog} likeBlog={likeBlog} deleteBlog={deleteBlog} />
             )}
         </div>
       }

@@ -1,7 +1,7 @@
 import React from 'react'
 import Togglable from './Togglable'
 
-const Blog = ({ blog, likeBlog }) => {
+const Blog = ({ blog, likeBlog, deleteBlog }) => {
 
 
   const blogStyle = {
@@ -17,8 +17,9 @@ const Blog = ({ blog, likeBlog }) => {
       {blog.title} - {blog.author}
       <Togglable openButtonLabel='view' closeButtonLabel='hide'>
         {blog.url}<br />
-        likes {blog.likes}<button type='submit' onClick={() => likeBlog(blog.id, blog)}>like</button><br />
-        {blog.user.name}
+        likes {blog.likes}<button onClick={() => likeBlog(blog.id, blog)}>like</button><br />
+        {blog.user.name}<br />
+        <button onClick={() => deleteBlog(blog.id, blog)}>delete</button>
       </Togglable>
     </div>
 
