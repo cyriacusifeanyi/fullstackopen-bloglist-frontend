@@ -17,7 +17,7 @@ const Blog = ({ blog, likeBlog }) => {
       {blog.title} - {blog.author}
       <Togglable openButtonLabel='view' closeButtonLabel='hide'>
         {blog.url}<br />
-        likes {blog.likes}<button onClick={() => likeBlog(blog.id, blog)}>like</button><br />
+        likes {blog.likes}<button type='submit' onClick={() => likeBlog(blog.id, blog)}>like</button><br />
         {blog.user.name}
       </Togglable>
     </div>
