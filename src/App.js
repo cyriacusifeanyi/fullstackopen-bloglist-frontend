@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
@@ -35,6 +35,7 @@ const App = () => {
 
 
   const addBlog = (blogObject) => {
+    noteFormRef.current.toggleVisibility()
     blogService
       .create(blogObject)
       .then(returnedBlog => {
@@ -45,7 +46,7 @@ const App = () => {
           setNotificationMessage(null)
         }, 5000)
       })
-      .catch(exception => {
+      .catch(() => {
         setMessageType('error')
         setNotificationMessage('Unable to create new blog post')
         setTimeout(() => {
@@ -55,7 +56,7 @@ const App = () => {
   }
 
   const deleteBlog = async (id, blog) => {
-    let permission = window.confirm(`remove blog`, blog.title, ` by `, blog.author)
+    let permission = window.confirm('remove blog', blog.title, ' by ', blog.author)
 
     if (permission) {
 
@@ -84,7 +85,7 @@ const App = () => {
     try {
 
       await blogService
-        .update(id, { "likes": ++blog.likes })
+        .update(id, { 'likes': ++blog.likes })
       setMessageType('success')
       setNotificationMessage('you just liked: '.concat(blog.title))
       setTimeout(() => {
@@ -148,6 +149,7 @@ const App = () => {
       }, 5000)
     }
   }
+  const noteFormRef = useRef()
 
 
   return (
@@ -168,7 +170,7 @@ const App = () => {
             {user.name} logged-in
             <button onClick={handleLogout}>logout</button>
           </p>
-          <Togglable openButtonLabel='new note' closeButtonLabel='cancel'>
+          <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={noteFormRef}>
             <BlogForm createBlog={addBlog} />
           </Togglable>
 
