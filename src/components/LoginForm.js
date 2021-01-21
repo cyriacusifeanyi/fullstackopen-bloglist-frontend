@@ -9,32 +9,34 @@ const LoginForm = ({
   password
 }) => {
   return (
-    <form onSubmit={handleSubmit}>
+    <form id='loginForm' onSubmit={handleSubmit}>
       <h2>log in to application</h2>
 
       <div>
         username
         <input
-          type="text"
+          id='username'
+          type='text'
           value={username}
-          name="username"
+          name='username'
           onChange={handleUsernameChange}
           // onChange={({ target }) => setUsername(target.value)}
-          autoComplete="current-username"
+          autoComplete='current-username'
         />
       </div>
       <div>
         password
         <input
-          type="password"
+          id='password'
+          type='password'
           value={password}
-          name="password"
+          name='password'
           onChange={handlePasswordChange}
           // onChange={({ target }) => setPassword(target.value)}
-          autoComplete="current-password"
+          autoComplete='current-password'
         />
       </div>
-      <button type="submit">login</button>
+      <button id='login-button' type='submit'>login</button>
     </form>
   )
 }
