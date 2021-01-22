@@ -5,7 +5,7 @@ const Notification = ({
   notificationMessage,
   messageType
 }) => {
-  if (notificationMessage === null) {
+  if (notificationMessage === '') {
     return null
   }
 

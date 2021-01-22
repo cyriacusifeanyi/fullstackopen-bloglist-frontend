@@ -154,7 +154,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification notificationMessage={notificationMessage} messageType={messageType} />
+      <Notification notificationMessage={notificationMessage || ''} messageType={messageType || ''} />
 
       {user === null ?
         <LoginForm
