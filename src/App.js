@@ -4,157 +4,118 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
+
 import blogService from './services/blogs'
 import loginService from './services/login'
+import storage from './utils/storage'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-
-  const [notificationMessage, setNotificationMessage] = useState(null)
-  const [messageType, setMessageType] = useState(null)
+  const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
+  const [notification, setNotification] = useState({ 'message': '', 'type': '' })
+
+  const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService
-      .getAll()
-      .then(initialBlogs =>
-        setBlogs(initialBlogs)
-      )
+    blogService.getAll().then(blogs =>
+      setBlogs(blogs)
+    )
   }, [])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
-    }
+    const user = storage.loadUser()
+    setUser(user)
   }, [])
 
-
-  const addBlog = (blogObject) => {
-    noteFormRef.current.toggleVisibility()
-    blogService
-      .create(blogObject)
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-        setMessageType('success')
-        setNotificationMessage('a new blog: '.concat(blogObject.title, ' by ', blogObject.author, ' added.'))
-        setTimeout(() => {
-          setNotificationMessage(null)
-        }, 5000)
-      })
-      .catch(() => {
-        setMessageType('error')
-        setNotificationMessage('Unable to create new blog post')
-        setTimeout(() => {
-          setNotificationMessage(null)
-        }, 5000)
-      })
-  }
-
-  const deleteBlog = async (id, blog) => {
-    let permission = window.confirm('remove blog', blog.title, ' by ', blog.author)
-
-    if (permission) {
-
-      try {
-        await blogService
-          .remove(id)
-        setMessageType('success')
-        setNotificationMessage('blog deleted succesfully: ')
-        setTimeout(() => {
-          setNotificationMessage(null)
-        }, 5000)
-
-      } catch (e) {
-        setMessageType('error')
-        setNotificationMessage('Unable to delete blog post')
-        setTimeout(() => {
-          setNotificationMessage(null)
-        }, 5000)
-      }
-
-    }
-
-  }
-
-  const likeBlog = async (id, blog) => {
-    try {
-
-      await blogService
-        .update(id, { 'likes': ++blog.likes })
-      setMessageType('success')
-      setNotificationMessage('you just liked: '.concat(blog.title))
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
-    } catch (e) {
-      --blog.likes
-      setMessageType('error')
-      setNotificationMessage('Unable to like blog post')
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
-    }
+  const notifyWith = (message, type = 'success') => {
+    setNotification({
+      message, type
+    })
+    setTimeout(() => {
+      setNotification({ 'message': '', 'type': '' })
+    }, 5000)
   }
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    console.log('logging in with', username, password)
 
     try {
       const user = await loginService.login({
         username, password,
       })
-      setMessageType('success')
-      setNotificationMessage('Login Successful')
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
-
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
-      blogService.setToken(user.token)
-      setUser(user)
       setUsername('')
       setPassword('')
+      setUser(user)
+      notifyWith(`${user.name} welcome back!`)
+      storage.saveUser(user)
     } catch (exception) {
-      setMessageType('error')
-      setNotificationMessage('Wrong credentials')
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
+      notifyWith('Wrong credentials', 'error')
+    }
+  }
+
+  const createBlog = async (blog) => {
+    try {
+      const newBlog = await blogService.create(blog)
+      blogFormRef.current.toggleVisibility()
+      setBlogs(blogs.concat(newBlog))
+      notifyWith(`a new blog '${newBlog.title}' by ${newBlog.author} added!`)
+    } catch (e) {
+      notifyWith('Unable to create new blog post')
+    }
+  }
+
+  const handleLike = async (id) => {
+    try {
+      const blogToLike = blogs.find(b => b.id === id)
+      const likedBlog = {
+        ...blogToLike,
+        likes: blogToLike.likes + 1,
+        user: blogToLike.user.id
+      }
+      await blogService.update(likedBlog)
+      setBlogs(
+        blogs.map(b => b.id === id ? {
+          ...blogToLike,
+          likes: blogToLike.likes + 1
+        } : b)
+      )
+      notifyWith('you just liked: '.concat(blogToLike.title))
+    } catch (e) {
+      notifyWith('Error: Unable to like blog post', 'error')
+    }
+  }
+
+  const handleRemove = async (id) => {
+    try {
+      const blogToRemove = blogs.find(b => b.id === id)
+      const ok = window.confirm(`Remove blog ${blogToRemove.title} by ${blogToRemove.author} ?`)
+      if (ok) {
+        await blogService.remove(id)
+        setBlogs(blogs.filter(b => b.id !== id))
+      }
+      notifyWith('blog post deleted succesfully:')
+    } catch (e) {
+      notifyWith('Error: Unable to delete blog post', 'error')
     }
   }
 
   const handleLogout = async (event) => {
     event.preventDefault()
-    console.log('logging out /"', username, '/"')
     try {
-      window.localStorage.removeItem('loggedBlogappUser')
-
-      blogService.setToken(null)
       setUser(null)
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      setMessageType('error')
-      setNotificationMessage('Unable to Logout')
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
+      storage.logoutUser()
+      notifyWith('Logout Successful')
+    } catch (e) {
+      notifyWith('logout unsuccessful - try again', 'error')
     }
   }
-  const noteFormRef = useRef()
 
-
+  const byLikes = (b1, b2) => b2.likes - b1.likes
   return (
     <div>
-      <Notification notificationMessage={notificationMessage || ''} messageType={messageType || ''} />
+      <Notification notification={notification} />
 
       {user === null ?
         <LoginForm
@@ -170,16 +131,20 @@ const App = () => {
             {user.name} logged-in
             <button onClick={handleLogout}>logout</button>
           </p>
-          <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={noteFormRef}>
-            <BlogForm createBlog={addBlog} />
+          <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
+            <BlogForm createBlog={createBlog} />
           </Togglable>
 
           <div id='blogLists'>
-            {blogs
-              .sort((a, b) => (a.likes < b.likes ? 1 : -1))
-              .map(blog =>
-                <Blog key={blog.id} blog={blog} likeBlog={likeBlog} deleteBlog={deleteBlog} />
-              )}
+            {blogs.sort(byLikes).map(blog =>
+              <Blog
+                key={blog.id}
+                blog={blog}
+                handleLike={handleLike}
+                handleRemove={handleRemove}
+                own={user.username === blog.user.username}
+              />
+            )}
           </div>
 
         </div>

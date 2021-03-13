@@ -2,44 +2,44 @@ import React, { useState } from 'react'
 
 const BlogForm = ({ createBlog }) => {
 
-  const [newBlogTitle, setNewBlogTitle] = useState('')
-  const [newBlogAuthor, setNewBlogAuthor] = useState('')
-  const [newBlogUrl, setNewBlogUrl] = useState('')
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
-  const addBlog = (event) => {
+  const handleNewBlog = (event) => {
     event.preventDefault()
     createBlog({
-      title: newBlogTitle,
-      author: newBlogAuthor,
-      url: newBlogUrl
+      title,
+      author,
+      url
     })
-    setNewBlogTitle('')
-    setNewBlogAuthor('')
-    setNewBlogUrl('')
+    setTitle('')
+    setAuthor('')
+    setUrl('')
   }
 
   return (
-    <form onSubmit={addBlog}>
+    <form onSubmit={handleNewBlog}>
       <h2>Create new</h2>
-      <label htmlFor='newBlogTitle'>Title</label>
+      <label htmlFor='title'>Title</label>
       <input
-        id='newBlogTitle'
-        value={newBlogTitle}
-        onChange={({ target }) => setNewBlogTitle(target.value)}
+        id='title'
+        value={title}
+        onChange={({ target }) => setTitle(target.value)}
       /> <br />
-      <label htmlFor='newBlogAuthor'>Author</label>
+      <label htmlFor='text'>Author</label>
       <input
-        id='newBlogAuthor'
+        id='text'
         type='text'
-        value={newBlogAuthor}
-        onChange={({ target }) => setNewBlogAuthor(target.value)}
+        value={author}
+        onChange={({ target }) => setAuthor(target.value)}
       /> <br />
-      <label htmlFor='newBlogUrl'>URL</label>
+      <label htmlFor='url'>URL</label>
       <input
-        id='newBlogUrl'
+        id='url'
         text='url'
-        value={newBlogUrl}
-        onChange={({ target }) => setNewBlogUrl(target.value)}
+        value={url}
+        onChange={({ target }) => setUrl(target.value)}
       /> <br />
       <button id='submitNewNote' type='submit'>create</button>
     </form>

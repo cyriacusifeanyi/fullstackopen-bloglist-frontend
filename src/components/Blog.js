@@ -1,7 +1,8 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Togglable from './Togglable'
 
-const Blog = ({ blog, likeBlog, deleteBlog }) => {
+const Blog = ({ blog, handleLike, handleRemove, own }) => {
 
   const blogStyle = {
     paddingTop: 10,
@@ -16,13 +17,23 @@ const Blog = ({ blog, likeBlog, deleteBlog }) => {
       {blog.title} - {blog.author}
       <Togglable openButtonLabel='view' closeButtonLabel='hide'>
         {blog.url}<br />
-        likes {blog.likes}<button onClick={() => likeBlog(blog.id, blog)}>like</button><br />
+        likes {blog.likes}<button onClick={() => handleLike(blog.id)}>like</button><br />
         {blog.user.name}<br />
-        <button onClick={() => deleteBlog(blog.id, blog)}>delete</button>
+        {own && <button onClick={() => handleRemove(blog.id)}>delete</button>}
       </Togglable>
     </div>
-
   )
+}
+
+Blog.propTypes = {
+  blog: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    author: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+  }).isRequired,
+  handleLike: PropTypes.func.isRequired,
+  handleRemove: PropTypes.func.isRequired,
+  own: PropTypes.bool.isRequired
 }
 
 export default Blog
