@@ -7,32 +7,30 @@ import BlogForm from './components/BlogForm'
 
 import blogService from './services/blogs'
 import loginService from './services/login'
-import storage from './utils/storage'
 
 import { notificationChange } from './reducers/notificationReducer'
-import { useDispatch } from 'react-redux'
+import { initializeBlogs, createBlog } from './reducers/blogReducer'
+import { loadUser, loginUser, logoutUser } from './reducers/userReducer'
+
+import { useDispatch, useSelector } from 'react-redux'
 
 const App = () => {
   const dispatch = useDispatch()
 
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
+  useEffect(() => {
+    dispatch(initializeBlogs())
+  }, [dispatch])
+  const blogs = useSelector(state => state.blogs)
+
+  useEffect(() => {
+    dispatch(loadUser())
+  }, [dispatch])
+  const user = useSelector(state => state.user)
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  // const [notification, setNotification] = useState({ 'message': '', 'type': '' })
 
   const blogFormRef = useRef()
-
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
-  }, [])
-
-  useEffect(() => {
-    const user = storage.loadUser()
-    setUser(user)
-  }, [])
 
   const notifyWith = (message, messageType = 'success') => {
     dispatch(notificationChange({ 'message': message, 'messageType': messageType }, 5))
@@ -47,22 +45,21 @@ const App = () => {
       })
       setUsername('')
       setPassword('')
-      setUser(user)
+      dispatch(loginUser(user))
       notifyWith(`${user.name} welcome back!`)
-      storage.saveUser(user)
     } catch (exception) {
       notifyWith('Wrong credentials', 'error')
     }
   }
 
-  const createBlog = async (blog) => {
+  const createNewBlog = async (blog) => {
     try {
-      const newBlog = await blogService.create(blog)
+      dispatch(createBlog(blog))
+
       blogFormRef.current.toggleVisibility()
-      setBlogs(blogs.concat(newBlog))
-      notifyWith(`a new blog '${newBlog.title}' by ${newBlog.author} added!`)
+      notifyWith(`a new blog '${blog.title}' by ${blog.author} added!`)
     } catch (e) {
-      notifyWith('Unable to create new blog post')
+      notifyWith('Unable to create new blog post', 'error')
     }
   }
 
@@ -75,12 +72,12 @@ const App = () => {
         user: blogToLike.user.id
       }
       await blogService.update(likedBlog)
-      setBlogs(
-        blogs.map(b => b.id === id ? {
-          ...blogToLike,
-          likes: blogToLike.likes + 1
-        } : b)
-      )
+      // setBlogs(
+      //   blogs.map(b => b.id === id ? {
+      //     ...blogToLike,
+      //     likes: blogToLike.likes + 1
+      //   } : b)
+      // )
       notifyWith('you just liked: '.concat(blogToLike.title))
     } catch (e) {
       notifyWith('Error: Unable to like blog post', 'error')
@@ -93,7 +90,7 @@ const App = () => {
       const ok = window.confirm(`Remove blog ${blogToRemove.title} by ${blogToRemove.author} ?`)
       if (ok) {
         await blogService.remove(id)
-        setBlogs(blogs.filter(b => b.id !== id))
+        // setBlogs(blogs.filter(b => b.id !== id))
       }
       notifyWith('blog post deleted succesfully:')
     } catch (e) {
@@ -104,8 +101,7 @@ const App = () => {
   const handleLogout = async (event) => {
     event.preventDefault()
     try {
-      setUser(null)
-      storage.logoutUser()
+      dispatch(logoutUser())
       notifyWith('Logout Successful')
     } catch (e) {
       notifyWith('logout unsuccessful - try again', 'error')
@@ -132,7 +128,7 @@ const App = () => {
             <button onClick={handleLogout}>logout</button>
           </p>
           <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
-            <BlogForm createBlog={createBlog} />
+            <BlogForm createNewBlog={createNewBlog} />
           </Togglable>
 
           <div id='blogLists'>
