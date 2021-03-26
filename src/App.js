@@ -9,7 +9,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 
 import { notificationChange } from './reducers/notificationReducer'
-import { initializeBlogs, createBlog } from './reducers/blogReducer'
+import { initializeBlogs, createBlog, likeBlog, deleteBlog } from './reducers/blogReducer'
 import { loadUser, loginUser, logoutUser } from './reducers/userReducer'
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -71,13 +71,9 @@ const App = () => {
         likes: blogToLike.likes + 1,
         user: blogToLike.user.id
       }
+
+      dispatch(likeBlog(likedBlog))
       await blogService.update(likedBlog)
-      // setBlogs(
-      //   blogs.map(b => b.id === id ? {
-      //     ...blogToLike,
-      //     likes: blogToLike.likes + 1
-      //   } : b)
-      // )
       notifyWith('you just liked: '.concat(blogToLike.title))
     } catch (e) {
       notifyWith('Error: Unable to like blog post', 'error')
@@ -88,11 +84,12 @@ const App = () => {
     try {
       const blogToRemove = blogs.find(b => b.id === id)
       const ok = window.confirm(`Remove blog ${blogToRemove.title} by ${blogToRemove.author} ?`)
+
       if (ok) {
-        await blogService.remove(id)
-        // setBlogs(blogs.filter(b => b.id !== id))
+        dispatch(deleteBlog(id))
+        notifyWith('blog post deleted succesfully:')
       }
-      notifyWith('blog post deleted succesfully:')
+
     } catch (e) {
       notifyWith('Error: Unable to delete blog post', 'error')
     }
