@@ -1,46 +1,22 @@
-import storage from './../utils/storage'
+import userService from '../services/users'
 
-const userReducer = (state = null, action) => {
+const userReducer = (state = [], action) => {
 
   switch (action.type) {
-    case 'LOAD_USER':
-      return action.data
-    case 'LOGIN_USER':
-      return action.data
-    case 'LOGOUT_USER':
-      return null
-    default:
-      return state
+  case 'INIT_USERS':
+    return action.data
+  default:
+    return state
   }
 }
 
-export const loadUser = () => {
+export const initializeUsers = () => {
   return async dispatch => {
-    const user = await storage.loadUser()
+    const users = await userService.getAll()
     dispatch({
-      type: 'LOAD_USER',
-      data: user,
+      type: 'INIT_USERS',
+      data: users,
     })
   }
 }
-
-export const loginUser = (user) => {
-  return dispatch => {
-    storage.saveUser(user)
-    dispatch({
-      type: 'LOGIN_USER',
-      data: user,
-    })
-  }
-}
-
-export const logoutUser = () => {
-  return dispatch => {
-    storage.logoutUser()
-    dispatch({
-      type: 'LOGOUT_USER'
-    })
-  }
-}
-
 export default userReducer

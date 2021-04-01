@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
+import Blogs from './components/Blogs'
+import Users from './components/Users'
 
-import blogService from './services/blogs'
 import loginService from './services/login'
 
 import { notificationChange } from './reducers/notificationReducer'
-import { initializeBlogs, createBlog, likeBlog, deleteBlog } from './reducers/blogReducer'
-import { loadUser, loginUser, logoutUser } from './reducers/userReducer'
+import { initializeBlogs, createBlog } from './reducers/blogReducer'
+import { loadUser, loginUser, logoutUser } from './reducers/authentication/userReducer'
 
 import { useDispatch, useSelector } from 'react-redux'
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  // Link
+} from 'react-router-dom'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -20,7 +27,7 @@ const App = () => {
   useEffect(() => {
     dispatch(initializeBlogs())
   }, [dispatch])
-  const blogs = useSelector(state => state.blogs)
+  // const blogs = useSelector(state => state.blogs)
 
   useEffect(() => {
     dispatch(loadUser())
@@ -63,38 +70,6 @@ const App = () => {
     }
   }
 
-  const handleLike = async (id) => {
-    try {
-      const blogToLike = blogs.find(b => b.id === id)
-      const likedBlog = {
-        ...blogToLike,
-        likes: blogToLike.likes + 1,
-        user: blogToLike.user.id
-      }
-
-      dispatch(likeBlog(likedBlog))
-      await blogService.update(likedBlog)
-      notifyWith('you just liked: '.concat(blogToLike.title))
-    } catch (e) {
-      notifyWith('Error: Unable to like blog post', 'error')
-    }
-  }
-
-  const handleRemove = async (id) => {
-    try {
-      const blogToRemove = blogs.find(b => b.id === id)
-      const ok = window.confirm(`Remove blog ${blogToRemove.title} by ${blogToRemove.author} ?`)
-
-      if (ok) {
-        dispatch(deleteBlog(id))
-        notifyWith('blog post deleted succesfully:')
-      }
-
-    } catch (e) {
-      notifyWith('Error: Unable to delete blog post', 'error')
-    }
-  }
-
   const handleLogout = async (event) => {
     event.preventDefault()
     try {
@@ -105,9 +80,8 @@ const App = () => {
     }
   }
 
-  const byLikes = (b1, b2) => b2.likes - b1.likes
   return (
-    <div>
+    <Router>
       <Notification />
 
       {user === null ?
@@ -121,29 +95,27 @@ const App = () => {
         <div>
           <h2>blogs</h2>
           <p>
-            {user.name} logged-in
+            {user.name} logged-in <br />
             <button onClick={handleLogout}>logout</button>
           </p>
-          <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
-            <BlogForm createNewBlog={createNewBlog} />
-          </Togglable>
 
-          <div id='blogLists'>
-            {blogs.sort(byLikes).map(blog =>
-              <Blog
-                key={blog.id}
-                blog={blog}
-                handleLike={handleLike}
-                handleRemove={handleRemove}
-                own={user.username === blog.user.username}
+          <Switch>
+            <Route path="/users">
+              <Users />
+            </Route>
+            <Route path="/">
+              <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
+                <BlogForm createNewBlog={createNewBlog} />
+              </Togglable>
+              <Blogs
+                username={user.username}
+                notifyWith={notifyWith}
               />
-            )}
-          </div>
-
+            </Route>
+          </Switch>
         </div>
       }
-
-    </div>
+    </Router>
   )
 }
 

@@ -3,12 +3,12 @@ const notificationReducer = (state = { 'message': '', 'messageType': '' }, actio
   // console.log('ACTION: ', action)
 
   switch (action.type) {
-    case 'SET_NOTIFICATION':
-      return action.data
-    case 'NOTIFICATION_TIMEOUT':
-      return null
-    default:
-      return state
+  case 'SET_NOTIFICATION':
+    return action.data
+  case 'NOTIFICATION_TIMEOUT':
+    return null
+  default:
+    return state
   }
 }
 
