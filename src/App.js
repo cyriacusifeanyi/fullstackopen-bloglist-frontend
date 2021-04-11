@@ -4,6 +4,7 @@ import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Blogs from './components/Blogs'
+import Blog from './components/Blog'
 import Users from './components/Users'
 import User from './components/User'
 
@@ -103,14 +104,14 @@ const App = () => {
             <Route path='/users'>
               <Users />
             </Route>
+            <Route path='/blogs/:id'>
+              <Blog notifyWith={notifyWith} username={userAuth.username} />
+            </Route>
             <Route path='/'>
               <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
                 <BlogForm createNewBlog={createNewBlog} />
               </Togglable>
-              <Blogs
-                username={userAuth.username}
-                notifyWith={notifyWith}
-              />
+              <Blogs />
             </Route>
           </Switch>
         </div>
