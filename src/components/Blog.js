@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   Link, useParams
 } from 'react-router-dom'
-import { likeBlog, deleteBlog } from './../reducers/blogReducer'
+import { likeBlog } from './../reducers/blogReducer'
 import PropTypes from 'prop-types'
 
-const Blog = ({ notifyWith, username }) => {
+const Blog = ({ notifyWith }) => {
   const dispatch = useDispatch()
   const id = useParams().id
   const blogs = useSelector(state => state.blogs)
@@ -16,7 +16,7 @@ const Blog = ({ notifyWith, username }) => {
     return null
   }
   console.log(blog)
-  const own = username === blog.user.username
+  // const own = username === blog.user.username
 
   const handleLike = async () => {
     try {

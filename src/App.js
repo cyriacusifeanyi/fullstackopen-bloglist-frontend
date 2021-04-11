@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   Switch,
   Route,
+  Link,
 } from 'react-router-dom'
 
 const App = () => {
@@ -78,45 +79,59 @@ const App = () => {
     }
   }
 
+  const padding = {
+    padding: 5
+  }
+  const navigation = {
+    padding: 5,
+    backgroundColor: '#d3d3d3'
+  }
+
   return (
     <div>
+      <div style={navigation}>
+        {/* <Link style={padding} to="/">home</Link> */}
+        <Link style={padding} to="/blogs">blogs</Link>
+        <Link style={padding} to="/users">users</Link>
+        {userAuth
+          ? <em>{userAuth.name} logged-in <button onClick={handleLogout}>logout</button></em>
+          : <Link style={padding} to="/login">login</Link>
+        }
+      </div>
+
       <Notification />
 
-      {userAuth === null ?
-        <LoginForm
-          username={username}
-          password={password}
-          handleUsernameChange={({ target }) => setUsername(target.value)}
-          handlePasswordChange={({ target }) => setPassword(target.value)}
-          handleSubmit={handleLogin}
-        /> :
-        <div>
-          <h2>blogs</h2>
-          <p>
-            {userAuth.name} logged-in <br />
-            <button onClick={handleLogout}>logout</button>
-          </p>
-
-          <Switch>
-            <Route path='/users/:id'>
-              <User />
-            </Route>
-            <Route path='/users'>
-              <Users />
-            </Route>
-            <Route path='/blogs/:id'>
-              <Blog notifyWith={notifyWith} username={userAuth.username} />
-            </Route>
-            <Route path='/'>
-              <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
-                <BlogForm createNewBlog={createNewBlog} />
-              </Togglable>
-              <Blogs />
-            </Route>
-          </Switch>
-        </div>
+      {
+        userAuth === null ?
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
+          /> :
+          <div>
+            <h2>blogs</h2>
+            <Switch>
+              <Route path='/users/:id'>
+                <User />
+              </Route>
+              <Route path='/users'>
+                <Users />
+              </Route>
+              <Route path='/blogs/:id'>
+                <Blog notifyWith={notifyWith} username={userAuth.username} />
+              </Route>
+              <Route path='/'>
+                <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
+                  <BlogForm createNewBlog={createNewBlog} />
+                </Togglable>
+                <Blogs />
+              </Route>
+            </Switch>
+          </div>
       }
-    </div>
+    </div >
   )
 }
 
