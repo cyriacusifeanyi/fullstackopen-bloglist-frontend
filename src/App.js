@@ -5,20 +5,20 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Blogs from './components/Blogs'
 import Users from './components/Users'
+import User from './components/User'
 
 import loginService from './services/login'
 
 import { notificationChange } from './reducers/notificationReducer'
 import { initializeBlogs, createBlog } from './reducers/blogReducer'
+import { initializeUsers } from './reducers/userReducer'
 import { loadUser, loginUser, logoutUser } from './reducers/authentication/userReducer'
 
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
-  // Link
 } from 'react-router-dom'
 
 const App = () => {
@@ -26,13 +26,10 @@ const App = () => {
 
   useEffect(() => {
     dispatch(initializeBlogs())
-  }, [dispatch])
-  // const blogs = useSelector(state => state.blogs)
-
-  useEffect(() => {
     dispatch(loadUser())
+    dispatch(initializeUsers())
   }, [dispatch])
-  const user = useSelector(state => state.user)
+  const userAuth = useSelector(state => state.user)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -81,10 +78,10 @@ const App = () => {
   }
 
   return (
-    <Router>
+    <div>
       <Notification />
 
-      {user === null ?
+      {userAuth === null ?
         <LoginForm
           username={username}
           password={password}
@@ -95,27 +92,30 @@ const App = () => {
         <div>
           <h2>blogs</h2>
           <p>
-            {user.name} logged-in <br />
+            {userAuth.name} logged-in <br />
             <button onClick={handleLogout}>logout</button>
           </p>
 
           <Switch>
-            <Route path="/users">
+            <Route path='/users/:id'>
+              <User />
+            </Route>
+            <Route path='/users'>
               <Users />
             </Route>
-            <Route path="/">
+            <Route path='/'>
               <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>
                 <BlogForm createNewBlog={createNewBlog} />
               </Togglable>
               <Blogs
-                username={user.username}
+                username={userAuth.username}
                 notifyWith={notifyWith}
               />
             </Route>
           </Switch>
         </div>
       }
-    </Router>
+    </div>
   )
 }
 
