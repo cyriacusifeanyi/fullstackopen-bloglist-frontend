@@ -11,6 +11,8 @@ const blogReducer = (state = [], action) => {
     return action.data
   case 'DELETE_BLOG':
     return action.data
+  case 'COMMENT_BLOG':
+    return action.data
   default:
     return state
   }
@@ -53,6 +55,16 @@ export const deleteBlog = (id) => {
 
     dispatch({
       type: 'DELETE_BLOG',
+      data: await blogService.getAll()
+    })
+  }
+}
+
+export const createComment = (id, comment) => {
+  return async dispatch => {
+    await blogService.comment(id, comment)
+    dispatch({
+      type: 'COMMENT_BLOG',
       data: await blogService.getAll()
     })
   }

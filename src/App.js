@@ -120,7 +120,7 @@ const App = () => {
                 <Users />
               </Route>
               <Route path='/blogs/:id'>
-                <Blog notifyWith={notifyWith} username={userAuth.username} />
+                <Blog notifyWith={notifyWith} />
               </Route>
               <Route path='/'>
                 <Togglable openButtonLabel='new note' closeButtonLabel='cancel' ref={blogFormRef}>

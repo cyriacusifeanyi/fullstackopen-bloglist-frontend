@@ -19,7 +19,6 @@ const Blog = ({ blog }) => {
 }
 
 const Blogs = () => {
-
   const blogs = useSelector(state => state.blogs)
   const byLikes = (b1, b2) => b2.likes - b1.likes
 
